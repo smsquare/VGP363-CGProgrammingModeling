@@ -115,7 +115,6 @@ bool OnInitInstance() {
 	return true;
 }
 
-
 bool GL_Initialize() {
 	// Configure EGL
 	EGLint configAttributes[] = {
@@ -165,7 +164,7 @@ bool GL_Initialize() {
 }
 
 void OnInitialize() {
-	glClearColor(0.2, 0.5, 0.8, 1.0);
+	glClearColor(0.0, 0.0, 0.0, 1.0);
 	glEnable(GL_CULL_FACE);
 	glEnable(GL_DEPTH_TEST);
 	glDepthFunc(GL_LEQUAL);
@@ -176,6 +175,39 @@ void OnInitialize() {
 
 void OnFrame() {
 	eglSwapBuffers(mDisplay, mSurface);
+}
+
+void GL_Uninitialize() {
+	if (mSurface != 0) {
+		eglDestroySurface(mDisplay, mSurface);
+		mSurface = 0;
+	}
+	if (mContext != 0) {
+		eglDestroyContext(mDisplay, mContext);
+		mContext = 0;
+	}
+}
+
+void OnDestroyInstance() {
+	GL_Uninitialize();
+
+	if (mDisplay != EGL_NO_DISPLAY) {
+		eglMakeCurrent(mDisplay, EGL_NO_SURFACE, EGL_NO_SURFACE, EGL_NO_CONTEXT);
+		eglTerminate(mDisplay);
+		mDisplay = EGL_NO_DISPLAY;
+	}
+
+	if (mNativeDisplay != 0) {
+		ReleaseDC(mNativeWindow, mNativeDisplay);
+		mNativeDisplay = 0;
+	}
+
+	if (mNativeWindow != 0) {
+		DestroyWindow(mNativeWindow);
+		mNativeWindow = 0;
+	}
+
+	UnregisterClassA("VGPProjectWndClass", NULL);
 }
 
 int main(int argc, char** argv) {
@@ -191,15 +223,16 @@ int main(int argc, char** argv) {
 	while(mAppRunning == true) {
 		MSG message = {0};
 		bool result = PeekMessage(&message, 0, 0, 0, PM_REMOVE);
-
+	
 		if (result == true) {
 			TranslateMessage(&message);
 			DispatchMessage(&message);
 		}
-
+	
 		OnFrame();
 	}
 
 	system("pause");
+	OnDestroyInstance();
 	return 0;
 }
