@@ -1,4 +1,4 @@
-// Main.cpp
+// main.cpp
 //////////////////////////////////////////////////////////////////////////
 
 #pragma comment(lib, "winmm.lib")
@@ -12,19 +12,10 @@
 
 #include <Windows.h>
 
-//////////////////////////////
-// High end machines		//
-//#include <GLES3\gl3.h>	//
-//#include <GLES3\gl3ext.h>	//
-//////////////////////////////
+#include "main.h"
+#include "APP.Main.h"
 
-#include <GLES2\gl2.h>
-#include <GLES2\gl2ext.h>
-
-#include <EGL\egl.h>
-#include <EGL\eglext.h>
-
-#include "Utility.Debug.h"
+using namespace CORE;
 
 EGLDisplay mDisplay = 0;
 EGLNativeWindowType mNativeWindow = 0;
@@ -125,7 +116,7 @@ bool GL_Initialize() {
 		EGL_SAMPLE_BUFFERS, EGL_DONT_CARE, EGL_NONE
 	};
 
-	EGLint mConfigCount = NULL;
+	EGLint mConfigCount = 0;
 	bool result = eglChooseConfig(mDisplay, configAttributes, &mConfig, 1, &mConfigCount);
 
 	if (result == false || mConfigCount != 1) {
@@ -164,16 +155,19 @@ bool GL_Initialize() {
 }
 
 void OnInitialize() {
-	glClearColor(0.0, 0.0, 0.0, 1.0);
+	glClearColor(0.0, 0.3, 0.0, 1.0);
 	glEnable(GL_CULL_FACE);
 	glEnable(GL_DEPTH_TEST);
 	glDepthFunc(GL_LEQUAL);
 	glDepthMask(true);
 	glClearDepthf(1.0f);
-	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+
+	APP::OnInitialize();
 }
 
 void OnFrame() {
+	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+	APP::OnFrame();
 	eglSwapBuffers(mDisplay, mSurface);
 }
 
